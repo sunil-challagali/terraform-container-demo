@@ -35,17 +35,15 @@ jobs:
       id: apply
       run: terraform apply -auto-approve
 
-    - name: Output ECR repository URL
-      id: ecr_output
-      run: echo "ECR_REPOSITORY_URL=$(terraform output -raw ecr_repository_url)" >> $GITHUB_ENV
-
-    - name: Output Execution Role ARN
-      id: execution_role_output
-      run: echo "EXECUTION_ROLE_ARN=$(terraform output -raw execution_role_arn)" >> $GITHUB_ENV
-
-    - name: Output Task Role ARN
-      id: task_role_output
-      run: echo "TASK_ROLE_ARN=$(terraform output -raw task_role_arn)" >> $GITHUB_ENV
+    - name: Capture Terraform outputs
+      id: capture_outputs
+      run: |
+        ECR_REPOSITORY_URL=$(terraform output -raw ecr_repository_url)
+        EXECUTION_ROLE_ARN=$(terraform output -raw execution_role_arn)
+        TASK_ROLE_ARN=$(terraform output -raw task_role_arn)
+        echo "ECR_REPOSITORY_URL=${ECR_REPOSITORY_URL}" >> $GITHUB_ENV
+        echo "EXECUTION_ROLE_ARN=${EXECUTION_ROLE_ARN}" >> $GITHUB_ENV
+        echo "TASK_ROLE_ARN=${TASK_ROLE_ARN}" >> $GITHUB_ENV
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
