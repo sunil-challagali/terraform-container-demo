@@ -42,21 +42,23 @@ jobs:
     - name: Capture Terraform outputs
       id: capture_outputs
       run: |
-        terraform output -json > tf_outputs.json
+        terraform output -json > tf_outputs_raw.json
+        tail -n +1 tf_outputs_raw.json > tf_outputs.json  # Remove any extraneous text
         cat tf_outputs.json  # Debugging step to check the full content of tf_outputs.json
 
     - name: Output Terraform JSON
       run: |
+        echo "Contents of tf_outputs.json:"
         cat tf_outputs.json  # Debugging step to check the full content of tf_outputs.json
 
     - name: Set environment variables from Terraform outputs
       id: set_env_vars
       run: |
-        # Debugging: Check the contents of tf_outputs.json before parsing
-        echo "Checking tf_outputs.json content"
+        # Debugging: Check the contents of tf_outputs.json before parsing with jq
+        echo "Checking tf_outputs.json content before parsing with jq"
         cat tf_outputs.json
 
-        # Safely extract values using jq
+        # Safely extract values using jq, handle missing or invalid data gracefully
         ECR_REPOSITORY_URL=$(jq -r '.ecr_repository_url.value // empty' tf_outputs.json)
         EXECUTION_ROLE_ARN=$(jq -r '.execution_role_arn.value // empty' tf_outputs.json)
         TASK_ROLE_ARN=$(jq -r '.task_role_arn.value // empty' tf_outputs.json)
@@ -68,7 +70,7 @@ jobs:
 
         # Check if any required values are missing
         if [ -z "$ECR_REPOSITORY_URL" ] || [ -z "$EXECUTION_ROLE_ARN" ] || [ -z "$TASK_ROLE_ARN" ]; then
-          echo "One or more Terraform output values are empty or invalid (sensitive). Please check your Terraform configuration."
+          echo "One or more Terraform output values are empty or invalid. Please check your Terraform configuration."
           exit 1
         fi
 
