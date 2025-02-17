@@ -14,11 +14,16 @@ module "vpc" {
   cidr_block  = "10.0.0.0/16"
 }
 
-module "security_groups" {
-  source        = "./modules/security_groups"
+module "security_group" {
+  source        = "./modules/security-group"
   vpc_id        = module.vpc.vpc_id
   sg_name       = "my-app-sg"
-  ingress_rules = [{ from_port = 80, to_port  = 80, protocol = "tcp", cidr_blocks = ["0.0.0.0/0"] }]
+  ingress_rules = [{
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }]
 }
 
 module "ecr" {
@@ -26,7 +31,7 @@ module "ecr" {
   repository_name = "my-app"
 }
 
-module "ecs-cluster" {
+module "ecs_cluster" {
   source       = "./modules/ecs-cluster"
   cluster_name = "my-app-cluster"
 }
@@ -38,7 +43,7 @@ module "iam" {
 }
 
 module "ecs_service" {
-  source             = "./modules/ecs_service"
+  source             = "./modules/ecs-service"
   cluster_id         = module.ecs_cluster.cluster_id
   service_name       = "my-app-service"
   task_definition    = "my-app-task"
