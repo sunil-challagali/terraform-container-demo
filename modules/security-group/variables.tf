@@ -17,3 +17,4 @@ variable "ingress_rules" {
     cidr_blocks = list(string)
   }))
 }
+
