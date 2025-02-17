@@ -10,4 +10,10 @@ variable "subnet_ids" {
 
 variable "security_group_id" {
   description = "The ID of the security group"
-  type
+  type        = string
+}
+
+variable "alb_name" {
+  description = "The name of the Application Load Balancer"
+  type        = string
+}
