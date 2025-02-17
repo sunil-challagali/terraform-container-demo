@@ -7,7 +7,7 @@ terraform {
     key    = "terraform-container/terraform.tfstate"
     region = "ap-south-1"
   }
-
+}
 module "vpc" {
   source      = "./modules/vpc"
   vpc_name    = "my-app-vpc"
@@ -15,7 +15,7 @@ module "vpc" {
 }
 
 module "security_group" {
-  source        = "./modules/security_groups"
+  source        = "./modules/security-group"
   vpc_id        = module.vpc.vpc_id
   sg_name       = "my-app-sg"
   ingress_rules = [{ from_port = 80, to_port  = 80, protocol = "tcp", cidr_blocks = ["0.0.0.0/0"] }]
@@ -38,7 +38,7 @@ module "iam" {
 }
 
 module "ecs_service" {
-  source             = "./modules/ecs_service"
+  source             = "./modules/ecs-service"
   cluster_id         = module.ecs_cluster.cluster_id
   service_name       = "my-app-service"
   task_definition    = "my-app-task"
