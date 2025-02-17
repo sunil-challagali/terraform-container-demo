@@ -39,43 +39,17 @@ jobs:
     - name: Install jq
       run: sudo apt-get install -y jq
 
-    - name: Capture Terraform outputs
-      id: capture_outputs
-      run: |
-        terraform output -json > tf_outputs.json
+    - name: Capture ECR repository URL
+      id: ecr_output
+      run: echo "ECR_REPOSITORY_URL=$(terraform output -raw ecr_repository_url)" >> $GITHUB_ENV
 
-    - name: Output Terraform JSON
-      run: |
-        echo "Contents of tf_outputs.json:"
-        cat tf_outputs.json
+    - name: Capture Execution Role ARN
+      id: execution_role_output
+      run: echo "EXECUTION_ROLE_ARN=$(terraform output -raw execution_role_arn)" >> $GITHUB_ENV
 
-    - name: Set environment variables from Terraform outputs
-      id: set_env_vars
-      run: |
-        # Debugging: Check the contents of tf_outputs.json before parsing with jq
-        echo "Checking tf_outputs.json content before parsing with jq"
-        cat tf_outputs.json
-
-        # Safely extract values using jq, handle missing or invalid data gracefully
-        ECR_REPOSITORY_URL=$(jq -r '.ecr_repository_url.value // empty' tf_outputs.json)
-        EXECUTION_ROLE_ARN=$(jq -r '.execution_role_arn.value // empty' tf_outputs.json)
-        TASK_ROLE_ARN=$(jq -r '.task_role_arn.value // empty' tf_outputs.json)
-
-        # Output extracted values for debugging
-        echo "ECR_REPOSITORY_URL=${ECR_REPOSITORY_URL}"
-        echo "EXECUTION_ROLE_ARN=${EXECUTION_ROLE_ARN}"
-        echo "TASK_ROLE_ARN=${TASK_ROLE_ARN}"
-
-        # Check if any required values are missing
-        if [ -z "$ECR_REPOSITORY_URL" ] || [ -z "$EXECUTION_ROLE_ARN" ] || [ -z "$TASK_ROLE_ARN" ]; then
-          echo "One or more Terraform output values are empty or invalid. Please check your Terraform configuration."
-          exit 1
-        fi
-
-        # Export as environment variables for later steps
-        echo "ECR_REPOSITORY_URL=${ECR_REPOSITORY_URL}" >> $GITHUB_ENV
-        echo "EXECUTION_ROLE_ARN=${EXECUTION_ROLE_ARN}" >> $GITHUB_ENV
-        echo "TASK_ROLE_ARN=${TASK_ROLE_ARN}" >> $GITHUB_ENV
+    - name: Capture Task Role ARN
+      id: task_role_output
+      run: echo "TASK_ROLE_ARN=$(terraform output -raw task_role_arn)" >> $GITHUB_ENV
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
