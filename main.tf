@@ -69,3 +69,15 @@ module "alb" {
 output "alb_dns_name" {
   value = module.alb.dns_name
 }
+output "ecr_repository_url" {
+  value = module.ecr.repository_url
+}
+
+output "execution_role_arn" {
+  value = module.iam.execution_role_arn
+}
+
+output "task_role_arn" {
+  value = module.iam.task_role_arn
+}
+
