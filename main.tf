@@ -14,7 +14,7 @@ module "vpc" {
   cidr_block  = "10.0.0.0/16"
 }
 
-module "security_group" {
+module "security_groups" {
   source        = "./modules/security-group"
   vpc_id        = module.vpc.vpc_id
   sg_name       = "my-app-sg"
@@ -26,7 +26,7 @@ module "ecr" {
   repository_name = "my-app"
 }
 
-module "ecs_cluster" {
+module "ecs-cluster" {
   source       = "./modules/ecs-cluster"
   cluster_name = "my-app-cluster"
 }
