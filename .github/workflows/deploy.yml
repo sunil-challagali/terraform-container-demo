@@ -1,7 +1,9 @@
 name: Deploy to AWS
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
   build:
@@ -28,8 +30,6 @@ jobs:
 
     - name: Validate Terraform
       run: terraform validate
-    - name: Terraform Plan
-      run: terraform plan
 
     - name: Apply Terraform
       id: apply
@@ -41,6 +41,10 @@ jobs:
       id: capture_outputs
       run: |
         terraform output -json > tf_outputs.json
+
+    - name: Output Terraform JSON
+      run: |
+        cat tf_outputs.json
 
     - name: Set environment variables from Terraform outputs
       id: set_env_vars
