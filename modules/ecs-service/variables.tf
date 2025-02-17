@@ -57,3 +57,4 @@ variable "task_role_arn" {
   description = "The ARN of the task role"
   type        = string
 }
+
