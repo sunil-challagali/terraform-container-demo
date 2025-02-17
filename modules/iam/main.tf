@@ -45,9 +45,29 @@ resource "aws_iam_role" "ecs_task" {
   }
 }
 
-resource "aws_iam_role_policy_attachment" "ecs_task_policy" {
+resource "aws_iam_policy" "ecs_task_policy" {
+  name        = "AmazonECSTaskPolicy"
+  description = "Policy for ECS tasks"
+  
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ecs:RunTask",
+          "ecs:StopTask",
+          "ecs:DescribeTasks"
+        ],
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_task_policy_attachment" {
   role       = aws_iam_role.ecs_task.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonECSTaskPolicy"
+  policy_arn = aws_iam_policy.ecs_task_policy.arn
 }
 
 output "execution_role_arn" {
