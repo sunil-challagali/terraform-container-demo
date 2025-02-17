@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "ap-south-1"
+  region = "us-west-2"
 }
 terraform {
   backend "s3" {
@@ -7,7 +7,7 @@ terraform {
     key    = "terraform-container/terraform.tfstate"
     region = "ap-south-1"
   }
-}
+
 module "vpc" {
   source      = "./modules/vpc"
   vpc_name    = "my-app-vpc"
@@ -15,10 +15,10 @@ module "vpc" {
 }
 
 module "security_group" {
-  source        = "./modules/security_groups"
+  source        = "./modules/security-group"
   vpc_id        = module.vpc.vpc_id
   sg_name       = "my-app-sg"
-  ingress_rules = [{ from_port = 80, to_port = 80, protocol = "tcp", cidr_blocks = ["0.0.0.0/0"] }]
+  ingress_rules = [{ from_port = 80, to_port  = 80, protocol = "tcp", cidr_blocks = ["0.0.0.0/0"] }]
 }
 
 module "ecr" {
@@ -31,8 +31,14 @@ module "ecs_cluster" {
   cluster_name = "my-app-cluster"
 }
 
+module "iam" {
+  source              = "./modules/iam"
+  execution_role_name = "ecsExecutionRole"
+  task_role_name      = "ecsTaskRole"
+}
+
 module "ecs_service" {
-  source             = "./modules/ecs_service"
+  source             = "./modules/ecs-service"
   cluster_id         = module.ecs_cluster.cluster_id
   service_name       = "my-app-service"
   task_definition    = "my-app-task"
@@ -43,23 +49,18 @@ module "ecs_service" {
   vpc_id             = module.vpc.vpc_id
   subnet_ids         = module.vpc.subnet_ids
   security_group_ids = [module.security_group.sg_id]
+  execution_role_arn = module.iam.execution_role_arn
+  task_role_arn      = module.iam.task_role_arn
 }
 
 module "alb" {
-  source          = "./modules/alb"
-  vpc_id          = module.vpc.vpc_id
-  subnet_ids      = module.vpc.subnet_ids
+  source            = "./modules/alb"
+  vpc_id            = module.vpc.vpc_id
+  subnet_ids        = module.vpc.subnet_ids
   security_group_id = module.security_group.sg_id
-  alb_name        = "my-app-alb"
-}
-
-module "iam" {
-  source            = "./modules/iam"
-  execution_role_name = "ecsExecutionRole"
-  task_role_name      = "ecsTaskRole"
+  alb_name          = "my-app-alb"
 }
 
 output "alb_dns_name" {
   value = module.alb.dns_name
 }
-
