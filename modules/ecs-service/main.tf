@@ -32,3 +32,4 @@ resource "aws_ecs_service" "this" {
 
   launch_type = "FARGATE"
 }
+
