@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "us-west-2"
+  region = "ap-south-1"
 }
 
 module "vpc" {
@@ -9,7 +9,7 @@ module "vpc" {
 }
 
 module "security_group" {
-  source        = "./modules/security-group"
+  source        = "./modules/security_groups"
   vpc_id        = module.vpc.vpc_id
   sg_name       = "my-app-sg"
   ingress_rules = [{ from_port = 80, to_port = 80, protocol = "tcp", cidr_blocks = ["0.0.0.0/0"] }]
@@ -26,7 +26,7 @@ module "ecs_cluster" {
 }
 
 module "ecs_service" {
-  source             = "./modules/ecs-service"
+  source             = "./modules/ecs_service"
   cluster_id         = module.ecs_cluster.cluster_id
   service_name       = "my-app-service"
   task_definition    = "my-app-task"
