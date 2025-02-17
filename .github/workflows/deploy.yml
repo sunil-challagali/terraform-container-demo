@@ -43,8 +43,8 @@ jobs:
 
     - name: Build and push Docker image
       env:
-        ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
-        ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+        ECR_REGISTRY: ${{ steps.apply.outputs.ecr_repository_url }}
+        ECR_REPOSITORY: "my-app"
         IMAGE_TAG: ${{ github.sha }}
       run: |
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
@@ -59,7 +59,7 @@ jobs:
           containerDefinitions: |
             [{
               "name": "my-app-container",
-              "image": "${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:${{ github.sha }}",
+              "image": "${{ steps.apply.outputs.ecr_repository_url }}/my-app:${{ github.sha }}",
               "essential": true,
               "portMappings": [{
                 "containerPort": 80,
@@ -70,8 +70,8 @@ jobs:
             - FARGATE
           cpu: 256
           memory: 512
-          executionRoleArn: ${{ secrets.ECS_EXECUTION_ROLE_ARN }}
-          taskRoleArn: ${{ secrets.ECS_TASK_ROLE_ARN }}
+          executionRoleArn: ${{ steps.apply.outputs.execution_role_arn }}
+          taskRoleArn: ${{ steps.apply.outputs.task_role_arn }}
         service: my-app-service
         cluster: my-app-cluster
         wait-for-service-stability: true
