@@ -2,7 +2,6 @@ name: Deploy to AWS
 
 on:
   workflow_dispatch:
-   
 
 jobs:
   build:
@@ -33,7 +32,21 @@ jobs:
       run: terraform plan
 
     - name: Apply Terraform
+      id: apply
       run: terraform apply -auto-approve
+      continue-on-error: true
+
+    - name: Output ECR repository URL
+      id: ecr_output
+      run: echo "::set-output name=ecr_repository_url::$(terraform output -raw ecr_repository_url)"
+
+    - name: Output Execution Role ARN
+      id: execution_role_output
+      run: echo "::set-output name=execution_role_arn::$(terraform output -raw execution_role_arn)"
+
+    - name: Output Task Role ARN
+      id: task_role_output
+      run: echo "::set-output name=task_role_arn::$(terraform output -raw task_role_arn)"
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
@@ -43,7 +56,7 @@ jobs:
 
     - name: Build and push Docker image
       env:
-        ECR_REGISTRY: ${{ steps.apply.outputs.ecr_repository_url }}
+        ECR_REGISTRY: ${{ steps.ecr_output.outputs.ecr_repository_url }}
         ECR_REPOSITORY: "my-app"
         IMAGE_TAG: ${{ github.sha }}
       run: |
@@ -59,7 +72,7 @@ jobs:
           containerDefinitions: |
             [{
               "name": "my-app-container",
-              "image": "${{ steps.apply.outputs.ecr_repository_url }}/my-app:${{ github.sha }}",
+              "image": "${{ steps.ecr_output.outputs.ecr_repository_url }}/my-app:${{ github.sha }}",
               "essential": true,
               "portMappings": [{
                 "containerPort": 80,
@@ -70,8 +83,8 @@ jobs:
             - FARGATE
           cpu: 256
           memory: 512
-          executionRoleArn: ${{ steps.apply.outputs.execution_role_arn }}
-          taskRoleArn: ${{ steps.apply.outputs.task_role_arn }}
+          executionRoleArn: ${{ steps.execution_role_output.outputs.execution_role_arn }}
+          taskRoleArn: ${{ steps.task_role_output.outputs.task_role_arn }}
         service: my-app-service
         cluster: my-app-cluster
         wait-for-service-stability: true
