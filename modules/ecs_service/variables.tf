@@ -8,24 +8,44 @@ variable "service_name" {
   type        = string
 }
 
-variable "task_family" {
-  description = "The family of the ECS task"
+variable "task_definition" {
+  description = "The ECS task definition family"
   type        = string
 }
 
-variable "container_definitions" {
-  description = "The container definitions in JSON format"
+variable "container_name" {
+  description = "The name of the container"
   type        = string
 }
 
-variable "cpu" {
-  description = "The amount of CPU units used by the task"
+variable "container_port" {
+  description = "The port that the container listens on"
+  type        = number
+}
+
+variable "image_url" {
+  description = "The URL of the container image in ECR"
   type        = string
 }
 
-variable "memory" {
-  description = "The amount of memory (in MiB) used by the task"
+variable "desired_count" {
+  description = "The number of tasks to run"
+  type        = number
+}
+
+variable "vpc_id" {
+  description = "The ID of the VPC"
   type        = string
+}
+
+variable "subnet_ids" {
+  description = "The IDs of the subnets"
+  type        = list(string)
+}
+
+variable "security_group_ids" {
+  description = "The IDs of the security groups"
+  type        = list(string)
 }
 
 variable "execution_role_arn" {
@@ -37,34 +57,3 @@ variable "task_role_arn" {
   description = "The ARN of the task role"
   type        = string
 }
-
-variable "desired_count" {
-  description = "The desired number of tasks"
-  type        = number
-}
-
-variable "subnets" {
-  description = "The list of subnet IDs for the ECS service"
-  type        = list(string)
-}
-
-variable "security_groups" {
-  description = "The list of security group IDs for the ECS service"
-  type        = list(string)
-}
-
-variable "target_group_arn" {
-  description = "The ARN of the target group"
-  type        = string
-}
-
-variable "container_name" {
-  description = "The name of the container"
-  type        = string
-}
-
-variable "container_port" {
-  description = "The port on which the container is listening"
-  type        = number
-}
-
